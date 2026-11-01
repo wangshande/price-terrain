@@ -1,59 +1,17 @@
 name: CI
-on:
-  push:
-  pull_request:
-  workflow_dispatch:
+on: [push, pull_request, workflow_dispatch]
 permissions:
   contents: read
 jobs:
-  import-source:
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-      - name: Import verified initial source archive
-        run: |
-          echo 'bcab9156a37290ecd4c340f266ea99fc2947e04a8559308bd19e3079cc1e15d4  source-release.zip' | sha256sum --check
-          python3 - <<'PYTHON'
-          import pathlib, zipfile
-          root = pathlib.Path.cwd()
-          with zipfile.ZipFile('source-release.zip') as archive:
-              for item in archive.infolist():
-                  path = pathlib.PurePosixPath(item.filename)
-                  if path.is_absolute() or '..' in path.parts or any(x in {'.git', '.github', 'node_modules', '.wrangler', '.openai'} for x in path.parts):
-                      raise ValueError('Invalid source path')
-              archive.extractall(root)
-          pathlib.Path('source-release.zip').unlink()
-          PYTHON
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add .
-          git commit -m 'feat: release Price Terrain source and independent deployment'
-          git push origin HEAD:main
   check:
-    needs: import-source
-    if: always() && (needs.import-source.result == 'success' || needs.import-source.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && 'main' || github.sha }}
-      - id: source
-        run: echo "ready=$(test -f package-lock.json && echo true || echo false)" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v4
-        if: steps.source.outputs.ready == 'true'
         with:
           node-version: 22
           cache: npm
       - run: npm ci
-        if: steps.source.outputs.ready == 'true'
       - run: npm test
-        if: steps.source.outputs.ready == 'true'
       - run: npm run typecheck
-        if: steps.source.outputs.ready == 'true'
       - run: npm run build
-        if: steps.source.outputs.ready == 'true'
