@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {reliefPixels,projectClip} from '../public/atlas/relief.mjs';
+test('默认三维高度清晰可见，整个起伏滑杆区间均有效',()=>{for(const scope of [{district:true},{local:true},{}]){const normal=reliefPixels({...scope,exaggeration:1.25});assert.ok(normal>120&&normal<180);let prior=0;for(let exaggeration=.5;exaggeration<=2.5;exaggeration+=.25){const height=reliefPixels({...scope,exaggeration});assert.ok(height>prior);assert.ok(height<340);prior=height;}assert.equal(reliefPixels({...scope,pitch:45,exaggeration:1.25}),reliefPixels({...scope,pitch:70,exaggeration:1.25}));}});
+test('连接线用与曲面相同的投影，地面坐标保持不变',()=>{const identity=[1,0,0,0,0,1,0,0,0,-.5,1,0,0,0,0,1],ground=projectClip(identity,.2,.3,0,800,600),peak=projectClip(identity,.2,.3,.1,800,600);assert.equal(ground.x,480);assert.equal(ground.y,210);assert.equal(peak.x,ground.x);assert.ok(peak.y>ground.y);assert.deepEqual(projectClip(identity,.2,.3,0,800,600),ground);});

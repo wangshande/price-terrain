@@ -1,0 +1,4 @@
+import {community} from '../../../lib/market/service.mjs';
+import {persist,storedCommunityHistory} from '../../../lib/market/repository';
+import {json,error} from '../../../lib/market/http.mjs';
+export async function GET(request:Request){const u=new URL(request.url);try{const data=await community(u.searchParams.get('city')??'',u.searchParams.get('id')??'',{force:u.searchParams.get('refresh')==='1'});const storage=await persist([data],'community:'+data.id);const stored=await storedCommunityHistory(data.city,data.id,data.priceType);if(data.historyStatus!=='available'&&stored.length){data.history=stored;data.historyStatus=stored.length>1?'collected':'not_available';data.historyNote=stored.length>1?'本曲线来自本站实际采集并保存的月度记录；缺失月份留空。':'目前只有一个月的真实记录，尚未形成连续历史。';}return json({...data,storage});}catch(e){return error(e);}}

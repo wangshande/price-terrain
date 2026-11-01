@@ -8,6 +8,8 @@
 
 ![北京三维价格地形](docs/media/price.jpg)
 
+[![观看44秒演示](docs/media/promo-cover.jpg)](docs/media/price-terrain-promo.mp4)
+
 ## 两张地图，回答两个问题
 
 | 显示内容 | 你能看到什么 |
@@ -46,7 +48,7 @@ npm run db:migrate
 npm run dev
 ```
 
-打开 **http://localhost:4173/atlas/index.html**。本地数据库自动保存在 `.wrangler/state/`，不会上传 Git。
+打开 [本地地图](http://localhost:4173/atlas/index.html)。本地数据库自动保存在 `.wrangler/state/`，不会上传 Git。
 
 首次访问需要获取地图和公开价格；来源速度、访问限制及数据更新时间会影响结果。放大后仅请求当前可见范围，重复查看优先复用缓存。
 
@@ -83,9 +85,9 @@ Cloudflare 账号的配额和费用以你自己的套餐为准。不要提交任
 public/atlas/           地图 UI、WebGL 曲面、Worker、视口缓存
 app/api/                价格、城市、区县、小区与视口接口
 lib/market/             公开来源解析、数据提供器、D1 仓储
- db/、drizzle/           数据表与迁移
- tests/                 价格解析、数据隔离、地形和缓存测试
- docs/                  数据说明、截图、演示视频
+db/、drizzle/           数据表与迁移
+tests/                 价格解析、数据隔离、地形和缓存测试
+docs/                  数据说明、截图、演示视频
 ```
 
 ## 接口
